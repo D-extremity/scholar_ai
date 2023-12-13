@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "92440660406",
+    "project_id": "scholar-ai-7884a",
+    "storage_bucket": "scholar-ai-7884a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92440660406:android:8c6cb3d6d22574937b9917",
+        "android_client_info": {
+          "package_name": "com.example.scholar_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSfJ27B3hDcCXhG-l896VQyC9lz-Z0iw4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
