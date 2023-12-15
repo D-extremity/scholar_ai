@@ -8,4 +8,4 @@ But through scholar Students but also other people can use AI for their self imp
 Scholar AI can help people in gaining knowledge through their device without getting distracted from various things on Internet , as it is one stop solution for all the questions and learnings . 
 One can also write important things and save it in notes, after that they can access it anywhere. 
 
-<video src="scholar_ai.mp4" controls title="ScholarAi"></video>
+https://github.com/D-extremity/scholar_ai/assets/83233310/9940af00-8f09-43a2-9fbd-504bfaddc63f
