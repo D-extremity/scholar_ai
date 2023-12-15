@@ -1,8 +1,8 @@
-import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:scholar_ai/backend/palmapi.dart';
+import 'package:scholar_ai/firebasemethods/savenotes.dart';
 import 'package:scholar_ai/models/chatmodel.dart';
 import 'package:scholar_ai/utils/colours.dart';
 
@@ -14,6 +14,7 @@ class ChatGptScreen extends StatefulWidget {
 }
 
 class _ChatGptScreenState extends State<ChatGptScreen> {
+  StorageMethods _storage = StorageMethods();
   final TextEditingController _getUserchat = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -35,8 +36,12 @@ class _ChatGptScreenState extends State<ChatGptScreen> {
             padding: const EdgeInsets.only(left: 8.0, right: 8),
             child: Column(
               children: [
+                const Text(
+                  "Long Press On Chat To Save It To Bookmarks",
+                  style: TextStyle(color: Colors.green),
+                ),
                 Container(
-                  height: constraints.maxHeight * 0.9,
+                  height: constraints.maxHeight * 0.85,
                   child: ListView.builder(
                     dragStartBehavior: DragStartBehavior.down,
                     reverse: false,
@@ -45,9 +50,17 @@ class _ChatGptScreenState extends State<ChatGptScreen> {
                       List<Map<String, String>> finalChats = chatDetails;
                       finalChats.reversed;
                       Map<String, String> content = finalChats[index];
-                      return Chat(
-                        constraints: constraints,
-                        content: content,
+                      return GestureDetector(
+                        onLongPress: () {
+                          _storage.storeNotes(
+                              content['message'].toString(),
+                              finalChats[index - 1]['message'].toString(),
+                              context);
+                        },
+                        child: Chat(
+                          constraints: constraints,
+                          content: content,
+                        ),
                       );
                     },
                   ),

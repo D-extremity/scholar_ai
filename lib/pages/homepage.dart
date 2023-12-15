@@ -7,9 +7,12 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:image_picker/image_picker.dart';
 import 'package:scholar_ai/backend/palmapi.dart';
 import 'package:scholar_ai/firebasemethods/firebaseauth.dart';
+import 'package:scholar_ai/firebasemethods/savenotes.dart';
 import 'package:scholar_ai/models/chatmodel.dart';
 import 'package:scholar_ai/pages/gptscreen.dart';
+import 'package:scholar_ai/pages/writenotes.dart';
 import 'package:scholar_ai/utils/colours.dart';
+import 'package:scholar_ai/widgets/notes.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,6 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ImagePicker picker = ImagePicker();
+  StorageMethods _storage = StorageMethods();
   @override
   Widget build(BuildContext context) {
     return SafeArea(child: Scaffold(body: LayoutBuilder(
@@ -54,7 +58,8 @@ class _HomePageState extends State<HomePage> {
                 )
               ]),
               SizedBox(
-                height: constraints.maxHeight * 0.015,
+                height: constraints.maxHeight * 0.0219,
+                child: const Text("Long Press On Bookmark/Notes To Delete"),
               ),
               SizedBox(
                   width: constraints.maxWidth,
@@ -65,18 +70,47 @@ class _HomePageState extends State<HomePage> {
                       padding: const EdgeInsets.all(8),
                       child: Column(
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                "Bookmarks",
-                                style: TextStyle(color: Colors.green.shade200),
-                              ),
-                              Icon(
-                                Icons.book,
-                                color: Colors.green.shade200,
-                              ),
-                            ],
-                          )
+                          SizedBox(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "Bookmarks",
+                                  style:
+                                      TextStyle(color: Colors.green.shade200),
+                                ),
+                                Icon(
+                                  Icons.book,
+                                  color: Colors.green.shade200,
+                                ),
+                              ],
+                            ),
+                          ),
+                          StreamBuilder(
+                              stream: _storage.getNotes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.active) {
+                                  if (snapshot.hasData) {
+                                    return Flexible(
+                                      child: ListView.builder(
+                                          itemCount: snapshot.data!.size,
+                                          reverse: true,
+                                          itemBuilder: (context, index) {
+                                            return snapshot.data!.docs
+                                                .map((document) => Notes(
+                                                    index: index,
+                                                    document: document))
+                                                .toList()[index];
+                                          }),
+                                    );
+                                  } else if (snapshot.data!.size == 0) {
+                                    return const Text("No Notes Available");
+                                  } else if (snapshot.hasError) {
+                                    return const Text("Network error occurred");
+                                  }
+                                }
+                                return const Text("No Network");
+                              })
                         ],
                       ),
                     ),
@@ -91,17 +125,63 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Notes",
-                              style: TextStyle(color: Colors.green.shade200),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Notes",
+                                    style:
+                                        TextStyle(color: Colors.green.shade200),
+                                  ),
+                                  Icon(
+                                    Icons.note,
+                                    color: Colors.green.shade200,
+                                  ),
+                                ],
+                              ),
+                              
                             ),
-                            Icon(
-                              Icons.note,
-                              color: Colors.green.shade200,
-                            ),
+                            GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(CupertinoPageRoute(
+                                      builder: (context) =>
+                                          const WriteNotesScreen(title: '', note: '',)));
+                                },
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 30,
+                                  color: backgroundColor,
+                                ))
                           ],
-                        )
+                        ),
+                        StreamBuilder(
+                              stream: _storage.getUserNotes(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.active) {
+                                  if (snapshot.hasData) {
+                                    return Flexible(
+                                      child: ListView.builder(
+                                          itemCount: snapshot.data!.size,
+                                          reverse: true,
+                                          itemBuilder: (context, index) {
+                                            return snapshot.data!.docs
+                                                .map((document) => Notes(
+                                                    index: index,
+                                                    document: document))
+                                                .toList()[index];
+                                          }),
+                                    );
+                                  } else if (snapshot.data!.size == 0) {
+                                    return const Text("No Notes Available");
+                                  } else if (snapshot.hasError) {
+                                    return const Text("Network error occurred");
+                                  }
+                                }
+                                return const Text("No Network");
+                              })
                       ],
                     ),
                   ),
@@ -141,9 +221,9 @@ class _HomePageState extends State<HomePage> {
                                   source: ImageSource.gallery);
                               String a = await getImageTotext(image!.path);
                               String m = await makeApiRequest(a);
-                            chatDetails.add({'user': 'bot', 'message': m});
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => ChatGptScreen()));
+                              chatDetails.add({'user': 'bot', 'message': m});
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => ChatGptScreen()));
                             },
                             icon: const Icon(Icons.image),
                             iconSize: constraints.maxWidth * 0.11),
